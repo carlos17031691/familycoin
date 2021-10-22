@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+#  familycoind The familycoin core server.
+#
+#
+# chkconfig: 345 80 20
+# description: familycoind
+# processname: familycoind
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/familycoind, see below
+if [ -f /etc/sysconfig/familycoind ]; then
+        . /etc/sysconfig/familycoind
+fi
+
+RETVAL=0
+
+prog=familycoind
+# you can override the lockfile via FAMILYCOIND_LOCKFILE in /etc/sysconfig/familycoind
+lockfile=${FAMILYCOIND_LOCKFILE-/var/lock/subsys/familycoind}
+
+# familycoind defaults to /usr/bin/familycoind, override with FAMILYCOIND_BIN
+familycoind=${FAMILYCOIND_BIN-/usr/bin/familycoind}
+
+# familycoind opts default to -disablewallet, override with FAMILYCOIND_OPTS
+familycoind_opts=${FAMILYCOIND_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $familycoind $familycoind_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac

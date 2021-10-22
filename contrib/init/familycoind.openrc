@@ -1,0 +1,92 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/familycoin/.familycoin" ]; then
+	FAMILYCOIND_DEFAULT_DATADIR="/var/lib/familycoin/.familycoin"
+else
+	FAMILYCOIND_DEFAULT_DATADIR="/var/lib/familycoind"
+fi
+
+FAMILYCOIND_CONFIGFILE=${FAMILYCOIND_CONFIGFILE:-/etc/familycoin/familycoin.conf}
+FAMILYCOIND_PIDDIR=${FAMILYCOIND_PIDDIR:-/var/run/familycoind}
+FAMILYCOIND_PIDFILE=${FAMILYCOIND_PIDFILE:-${FAMILYCOIND_PIDDIR}/familycoind.pid}
+FAMILYCOIND_DATADIR=${FAMILYCOIND_DATADIR:-${FAMILYCOIND_DEFAULT_DATADIR}}
+FAMILYCOIND_USER=${FAMILYCOIND_USER:-${FAMILYCOIN_USER:-familycoin}}
+FAMILYCOIND_GROUP=${FAMILYCOIND_GROUP:-familycoin}
+FAMILYCOIND_BIN=${FAMILYCOIND_BIN:-/usr/bin/familycoind}
+FAMILYCOIND_NICE=${FAMILYCOIND_NICE:-${NICELEVEL:-0}}
+FAMILYCOIND_OPTS="${FAMILYCOIND_OPTS:-${FAMILYCOIN_OPTS}}"
+
+name="Familycoin Core Daemon"
+description="Familycoin cryptocurrency P2P network daemon"
+
+command="/usr/bin/familycoind"
+command_args="-pid=\"${FAMILYCOIND_PIDFILE}\" \
+		-conf=\"${FAMILYCOIND_CONFIGFILE}\" \
+		-datadir=\"${FAMILYCOIND_DATADIR}\" \
+		-daemon \
+		${FAMILYCOIND_OPTS}"
+
+required_files="${FAMILYCOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${FAMILYCOIND_USER} \
+			-N ${FAMILYCOIND_NICE} -w 2000"
+pidfile="${FAMILYCOIND_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${FAMILYCOIND_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${FAMILYCOIND_USER}:${FAMILYCOIND_GROUP}" \
+	"${FAMILYCOIND_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${FAMILYCOIND_USER}:${FAMILYCOIND_GROUP}" \
+	"${FAMILYCOIND_PIDDIR}"
+
+	checkpath -f \
+	-o ${FAMILYCOIND_USER}:${FAMILYCOIND_GROUP} \
+	-m 0660 \
+	${FAMILYCOIND_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${FAMILYCOIND_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run familycoind."
+		eerror "The setting must appear in ${FAMILYCOIND_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Familycoin Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}
