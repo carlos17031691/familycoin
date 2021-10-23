@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Familycoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -48,7 +48,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-# error "Familycoin cannot be compiled without assertions."
+# error "Bitcoin cannot be compiled without assertions."
 #endif
 
 #define MICRO 0.000001
@@ -247,7 +247,7 @@ std::atomic_bool g_is_mempool_loaded{false};
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "Familycoin Signed Message:\n";
+const std::string strMessageMagic = "Bitcoin Signed Message:\n";
 
 // Internal stuff
 namespace {
@@ -941,7 +941,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // Remove conflicting transactions from the mempool
         for (CTxMemPool::txiter it : allConflicting)
         {
-            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s FAMILY additional fees, %d delta bytes\n",
+            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s BTC additional fees, %d delta bytes\n",
                     it->GetTx().GetHash().ToString(),
                     hash.ToString(),
                     FormatMoney(nModifiedFees - nConflictingFees),
@@ -1091,11 +1091,8 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
     }
 
     // Check the header
-    if (block.GetHash() != consensusParams.hashGenesisBlock)
-    {
-        if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
-            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
-    }
+    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
 
     return true;
 }
@@ -1688,7 +1685,7 @@ static bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState&
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("familycoin-scriptch");
+    RenameThread("bitcoin-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -1826,17 +1823,14 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     // is enforced in ContextualCheckBlockHeader(); we wouldn't want to
     // re-enforce that rule here (at least until we make it impossible for
     // GetAdjustedTime() to go backward).
-    if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock)
-    {
-        if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck)) {
-            if (state.CorruptionPossible()) {
-                // We don't write down blocks to disk if they may have been
-                // corrupted, so this should be impossible unless we're having hardware
-                // problems.
-                return AbortNode(state, "Corrupt block found indicating potential hardware failure; shutting down");
-            }
-            return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
+    if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck)) {
+        if (state.CorruptionPossible()) {
+            // We don't write down blocks to disk if they may have been
+            // corrupted, so this should be impossible unless we're having hardware
+            // problems.
+            return AbortNode(state, "Corrupt block found indicating potential hardware failure; shutting down");
         }
+        return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
     }
 
     // verify that the view's current state corresponds to the previous block
@@ -1848,7 +1842,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     if (block.GetHash() == chainparams.GetConsensus().hashGenesisBlock) {
         if (!fJustCheck)
             view.SetBestBlock(pindex->GetBlockHash());
-        // return true;
+        return true;
     }
 
     nBlocksTotal++;
@@ -1953,12 +1947,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     // post BIP34 before approximately height 486,000,000 and presumably will
     // be reset before it reaches block 1,983,702 and starts doing unnecessary
     // BIP30 checking again.
-    if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock) {
-        assert(pindex->pprev);
-        CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
-        //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
-        fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height || !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
-    }
+    assert(pindex->pprev);
     CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
     //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
     fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height || !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
@@ -1979,11 +1968,8 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     // Start enforcing BIP68 (sequence locks) and BIP112 (CHECKSEQUENCEVERIFY) using versionbits logic.
     int nLockTimeFlags = 0;
-    if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock)
-    {
-        if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV, versionbitscache) == ThresholdState::ACTIVE) {
-            nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
-        }
+    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV, versionbitscache) == ThresholdState::ACTIVE) {
+        nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
     }
 
     // Get the script flags for this block
@@ -2065,7 +2051,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > blockReward && block.GetHash() != chainparams.GetConsensus().hashGenesisBlock)
+    if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
                                block.vtx[0]->GetValueOut(), blockReward),
@@ -2079,10 +2065,8 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     if (fJustCheck)
         return true;
 
-    if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock) {
-        if (!WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
-            return false;
-    }
+    if (!WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
+        return false;
 
     if (!pindex->IsValid(BLOCK_VALID_SCRIPTS)) {
         pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
@@ -3110,8 +3094,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (block.GetHash() == consensusParams.hashGenesisBlock)
-        fCheckPOW = false;
     if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
 
