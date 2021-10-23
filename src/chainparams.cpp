@@ -20,8 +20,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 545259519 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
-    txNew.vout[0].nValue = genesisReward;
+    txNew.vin[0].scriptSig = CScript() << 545259519 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));    txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
     CBlock genesis;
@@ -75,9 +74,9 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Exception = uint256S("0x00");
+        consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S("0x00");
+        consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 0;
         consensus.BIP66Height = 0;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -118,7 +117,7 @@ public:
         nDefaultPort = 8443;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1634667189, 0, 0x1d00ffff, 1, 1000000 * COIN);
+        genesis = CreateGenesisBlock(1634667189, 0, 545259519, 1, 1000000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x6a50047f451016082386ea9225252800924d9cc6cd7a0b769ca55275567fcefe"));
         assert(genesis.hashMerkleRoot == uint256S("0x4e1b36ba55f82800b4261528fabf779ec2497c8258cc6402b8eaf172dfa8aca5"));
@@ -177,9 +176,9 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Exception = uint256S("0x00");
+        consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S("0x00");
+        consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 0;
         consensus.BIP66Height = 0;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -215,7 +214,7 @@ public:
         nDefaultPort = 18443;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1634667189, 0, 0x1d00ffff, 1, 1000000 * COIN);
+        genesis = CreateGenesisBlock(1634667189, 0, 545259519, 1, 1000000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x6a50047f451016082386ea9225252800924d9cc6cd7a0b769ca55275567fcefe"));
         assert(genesis.hashMerkleRoot == uint256S("0x4e1b36ba55f82800b4261528fabf779ec2497c8258cc6402b8eaf172dfa8aca5"));
@@ -270,11 +269,11 @@ public:
     CRegTestParams() {
         strNetworkID = "regtest";
         consensus.nSubsidyHalvingInterval = 150;
-        consensus.BIP16Exception = uint256S("0x00");
-        consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
-        consensus.BIP34Hash = uint256S("0x00");
-        consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
-        consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in rpc activation tests)
+        consensus.BIP16Exception = uint256();
+        consensus.BIP34Height = 0; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
+        consensus.BIP34Hash = uint256();
+        consensus.BIP65Height = 0; // BIP65 activated on regtest (Used in rpc activation tests)
+        consensus.BIP66Height = 0; // BIP66 activated on regtest (Used in rpc activation tests)
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -305,7 +304,7 @@ public:
         nDefaultPort = 18543;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1634667189, 0, 0x1d00ffff, 1, 1000000 * COIN);
+        genesis = CreateGenesisBlock(1634667189, 0, 545259519, 1, 1000000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x6a50047f451016082386ea9225252800924d9cc6cd7a0b769ca55275567fcefe"));
         assert(genesis.hashMerkleRoot == uint256S("0x4e1b36ba55f82800b4261528fabf779ec2497c8258cc6402b8eaf172dfa8aca5"));
