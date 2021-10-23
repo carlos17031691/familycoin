@@ -119,7 +119,7 @@ public:
 
         genesis = CreateGenesisBlock(1634667189, 0, 545259519, 1, 1000000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        if (consensus.hashGenesisBlock == uint256S("0x6a50047f451016082386ea9225252800924d9cc6cd7a0b769ca55275567fcefe"){
+        if (consensus.hashGenesisBlock == uint256S("0x6a50047f451016082386ea9225252800924d9cc6cd7a0b769ca55275567fcefe")){
             printf("true");
         } else {
             printf("false");
