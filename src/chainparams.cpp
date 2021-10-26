@@ -225,7 +225,7 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        vSeeds.push_back(CDNSSeedData("172.16.1.20", "172.16.1.20"));
+        vSeeds.push_back(CDNSSeedData("172.16.1.20", "172.16.1.20", true));
         // vSeeds.push_back(CDNSSeedData("loshan.co.uk", "seed-b.familycoin.loshan.co.uk", true));
         // vSeeds.push_back(CDNSSeedData("thrasher.io", "dnsseed-testnet.thrasher.io", true));
 
