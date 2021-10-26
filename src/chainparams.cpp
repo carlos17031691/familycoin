@@ -122,8 +122,8 @@ public:
         // Note that of those with the service bits flag, most only support a subset of possible options
         vSeeds.push_back(CDNSSeedData("172.16.1.20", "172.16.1.20", true));
         // vSeeds.push_back(CDNSSeedData("thrasher.io", "dnsseed.thrasher.io", true));
-        // vSeeds.push_back(CDNSSeedData("litecointools.com", "dnsseed.litecointools.com"));
-        // vSeeds.push_back(CDNSSeedData("litecoinpool.org", "dnsseed.litecoinpool.org"));
+        // vSeeds.push_back(CDNSSeedData("familycointools.com", "dnsseed.familycointools.com"));
+        // vSeeds.push_back(CDNSSeedData("familycoinpool.org", "dnsseed.familycoinpool.org"));
         // vSeeds.push_back(CDNSSeedData("koin-project.com", "dnsseed.koin-project.com"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,35);
@@ -226,7 +226,7 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         vSeeds.push_back(CDNSSeedData("172.16.1.20", "172.16.1.20"));
-        // vSeeds.push_back(CDNSSeedData("loshan.co.uk", "seed-b.litecoin.loshan.co.uk", true));
+        // vSeeds.push_back(CDNSSeedData("loshan.co.uk", "seed-b.familycoin.loshan.co.uk", true));
         // vSeeds.push_back(CDNSSeedData("thrasher.io", "dnsseed-testnet.thrasher.io", true));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
